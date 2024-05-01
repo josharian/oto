@@ -48,7 +48,29 @@ type _AudioStreamBasicDescription struct {
 
 type _AudioQueueRef uintptr
 
-type _AudioTimeStamp uintptr
+type _AudioQueueTimelineRef uintptr
+
+type _SMPTETime struct {
+	mSubframes       int16
+	mSubframeDivisor int16
+	mCounter         uint32
+	mType            uint32
+	mFlags           uint32
+	mHours           int16
+	mMinutes         int16
+	mSeconds         int16
+	mFrames          int16
+}
+
+type _AudioTimeStamp struct {
+	mSampleTime    float64
+	mHostTime      uint64
+	mRateScalar    float64
+	mWordClockTime uint64
+	mSMPTETime     _SMPTETime
+	mFlags         uint32
+	mReserved      uint32
+}
 
 type _AudioStreamPacketDescription struct {
 	mStartOffset            int64
@@ -81,6 +103,8 @@ func initializeAPI() error {
 	purego.RegisterLibFunc(&_AudioQueueEnqueueBuffer, toolbox, "AudioQueueEnqueueBuffer")
 	purego.RegisterLibFunc(&_AudioQueueStart, toolbox, "AudioQueueStart")
 	purego.RegisterLibFunc(&_AudioQueuePause, toolbox, "AudioQueuePause")
+	purego.RegisterLibFunc(&_AudioQueueGetCurrentTime, toolbox, "AudioQueueGetCurrentTime")
+	purego.RegisterLibFunc(&_AudioQueueDeviceTranslateTime, toolbox, "AudioQueueDeviceTranslateTime")
 	return nil
 }
 
@@ -93,3 +117,7 @@ var _AudioQueueEnqueueBuffer func(inAQ _AudioQueueRef, inBuffer _AudioQueueBuffe
 var _AudioQueueStart func(inAQ _AudioQueueRef, inStartTime *_AudioTimeStamp) uintptr
 
 var _AudioQueuePause func(inAQ _AudioQueueRef) uintptr
+
+var _AudioQueueGetCurrentTime func(inAQ _AudioQueueRef, inTimeline _AudioQueueTimelineRef, outTimeStamp *_AudioTimeStamp, outTimelineDiscontinuity *bool) uintptr
+
+var _AudioQueueDeviceTranslateTime func(inAQ _AudioQueueRef, inTimeStamp *_AudioTimeStamp, outTime *_AudioTimeStamp) uintptr

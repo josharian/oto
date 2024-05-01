@@ -50,8 +50,8 @@ func newAudioQueue(sampleRate, channelCount int, oneBufferSizeInBytes int) (_Aud
 		&desc,
 		render,
 		nil,
-		0, //CFRunLoopRef
-		0, //CFStringRef
+		0, // CFRunLoopRef
+		0, // CFStringRef
 		0,
 		&audioQueue); osstatus != noErr {
 		return 0, nil, fmt.Errorf("oto: AudioQueueNewFormat with StreamFormat failed: %d", osstatus)
@@ -232,6 +232,28 @@ try:
 		return fmt.Errorf("oto: AudioQueueStart failed at Resume: %d", osstatus)
 	}
 	return nil
+}
+
+func (c *context) CurrentFrame() (int, error) {
+	c.cond.L.Lock()
+	defer c.cond.L.Unlock()
+
+	if err := c.err.Load(); err != nil {
+		return -1, err.(error)
+	}
+	var ts _AudioTimeStamp
+	osstatus := _AudioQueueGetCurrentTime(c.audioQueue, 0, &ts, nil)
+	if osstatus != noErr {
+		return -1, fmt.Errorf("oto: CurrentFrame failed: %d", osstatus)
+	}
+	return int(ts.mSampleTime), nil
+	// var hostTime _AudioTimeStamp
+	// osstatus = _AudioQueueDeviceTranslateTime(c.audioQueue, &ts, &hostTime)
+	// if osstatus != noErr {
+	// 	return -1, fmt.Errorf("oto: TranslateTime failed: %d", osstatus)
+	// }
+	// log.Printf("oto: CurrentFrame: %v, %b, trans: %v (%b)", ts.mHostTime, ts.mFlags, hostTime.mHostTime, hostTime.mFlags)
+	// return int(hostTime.mSampleTime), nil
 }
 
 func (c *context) Err() error {

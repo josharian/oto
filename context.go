@@ -48,7 +48,7 @@ const (
 	// FormatUnsignedInt8 is the format of 8 bits integers.
 	FormatUnsignedInt8
 
-	//FormatSignedInt16LE is the format of 16 bits integers little endian.
+	// FormatSignedInt16LE is the format of 16 bits integers little endian.
 	FormatSignedInt16LE
 )
 
@@ -159,6 +159,10 @@ func (c *Context) Resume() error {
 // Err is concurrent-safe.
 func (c *Context) Err() error {
 	return c.context.Err()
+}
+
+func (c *Context) CurrentFrame() (int, error) {
+	return c.context.CurrentFrame()
 }
 
 type atomicError struct {
